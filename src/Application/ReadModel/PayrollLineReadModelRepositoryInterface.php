@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Payroll\Application\ReadModel;
 
-interface PayrollLineReadModelRepository
+interface PayrollLineReadModelRepositoryInterface
 {
     public function find(string $employeeId): ?PayrollLineReadModel;
 

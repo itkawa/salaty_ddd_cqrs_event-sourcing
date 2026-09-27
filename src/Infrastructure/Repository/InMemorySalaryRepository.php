@@ -7,13 +7,13 @@ namespace Payroll\Infrastructure\Repository;
 use Payroll\Domain\Salary\Aggregate\Salary;
 use Payroll\Domain\Salary\Event\AutoPayrollAmountChanged;
 use Payroll\Domain\Salary\Event\ManualAdjustmentAdded;
-use Payroll\Domain\Salary\Repository\SalaryRepository;
-use Payroll\Infrastructure\EventStore\InMemoryPayrollLineEventStore;
+use Payroll\Domain\Salary\Repository\SalaryRepositoryInterface;
+use Payroll\Infrastructure\EventStore\PayrollLineEventStoreInterface;
 
-final class InMemorySalaryRepository implements SalaryRepository
+final class InMemorySalaryRepository implements SalaryRepositoryInterface
 {
     public function __construct(
-        private readonly InMemoryPayrollLineEventStore $eventStore,
+        private readonly PayrollLineEventStoreInterface $eventStore,
     ) {
     }
 

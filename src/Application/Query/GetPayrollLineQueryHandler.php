@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Payroll\Application\Query;
 
 use Payroll\Application\ReadModel\PayrollLineReadModel;
-use Payroll\Application\ReadModel\PayrollLineReadModelRepository;
+use Payroll\Application\ReadModel\PayrollLineReadModelRepositoryInterface;
 
 final class GetPayrollLineQueryHandler
 {
     public function __construct(
-        private readonly PayrollLineReadModelRepository $readModelRepository,
+        private readonly PayrollLineReadModelRepositoryInterface $readModelRepository,
     ) {
     }
 

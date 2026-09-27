@@ -8,7 +8,7 @@ use Payroll\Domain\Salary\Aggregate\Salary;
 use Payroll\Domain\Salary\Event\AutoPayrollAmountChanged;
 use Payroll\Domain\Salary\Event\ManualAdjustmentAdded;
 
-interface SalaryRepository
+interface SalaryRepositoryInterface
 {
     public function load(string $employeeId): Salary;
 

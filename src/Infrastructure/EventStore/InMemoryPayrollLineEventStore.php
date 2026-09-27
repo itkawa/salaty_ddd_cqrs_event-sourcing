@@ -10,11 +10,11 @@ use Payroll\Domain\Salary\Event\ManualAdjustmentAdded;
 
 /**
  * Simulates one payroll_events table: every row is a uniform PayrollLineEvent
- * record, regardless of which domain event produced it. Callers (SalaryRepository)
+ * record, regardless of which domain event produced it. Callers (SalaryRepositoryInterface)
  * only ever see domain events (AutoPayrollAmountChanged|ManualAdjustmentAdded) —
  * translation to/from the storage record shape is entirely internal here.
  */
-final class InMemoryPayrollLineEventStore
+final class InMemoryPayrollLineEventStore implements PayrollLineEventStoreInterface
 {
     /** @var PayrollLineEvent[] */
     private array $payrollLineEvents = [];

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Payroll\Application\Logging;
 
-interface RejectedRecalculationLog
+interface RejectedRecalculationLogInterface
 {
     public function record(RejectedAutoRecalculation $entry): void;
 

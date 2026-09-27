@@ -6,12 +6,12 @@ namespace Payroll\Application\Handler;
 
 use Payroll\Application\Command\AddManualAdjustmentCommand;
 use Payroll\Application\Projection\PayrollLineProjectionHandler;
-use Payroll\Domain\Salary\Repository\SalaryRepository;
+use Payroll\Domain\Salary\Repository\SalaryRepositoryInterface;
 
 final class AddManualAdjustmentCommandHandler
 {
     public function __construct(
-        private readonly SalaryRepository $salaryRepository,
+        private readonly SalaryRepositoryInterface $salaryRepository,
         private readonly PayrollLineProjectionHandler $projectionHandler,
     ) {
     }

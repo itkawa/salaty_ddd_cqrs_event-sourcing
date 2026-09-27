@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Payroll\Infrastructure\Logging;
 
 use Payroll\Application\Logging\RejectedAutoRecalculation;
-use Payroll\Application\Logging\RejectedRecalculationLog;
+use Payroll\Application\Logging\RejectedRecalculationLogInterface;
 
-final class InMemoryRejectedRecalculationLog implements RejectedRecalculationLog
+final class InMemoryRejectedRecalculationLog implements RejectedRecalculationLogInterface
 {
     /** @var RejectedAutoRecalculation[] */
     private array $entries = [];

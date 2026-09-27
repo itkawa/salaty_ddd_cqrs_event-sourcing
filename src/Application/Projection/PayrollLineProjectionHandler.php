@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Payroll\Application\Projection;
 
 use Payroll\Application\ReadModel\PayrollLineReadModel;
-use Payroll\Application\ReadModel\PayrollLineReadModelRepository;
+use Payroll\Application\ReadModel\PayrollLineReadModelRepositoryInterface;
 use Payroll\Domain\Salary\Event\AutoPayrollAmountChanged;
 use Payroll\Domain\Salary\Event\ManualAdjustmentAdded;
 
 final class PayrollLineProjectionHandler
 {
     public function __construct(
-        private readonly PayrollLineReadModelRepository $readModelRepository,
+        private readonly PayrollLineReadModelRepositoryInterface $readModelRepository,
     ) {
     }
 

@@ -6,16 +6,16 @@ namespace Payroll\Application\Handler;
 
 use Payroll\Application\Command\ApplyAutoCalculatedAmountCommand;
 use Payroll\Application\Logging\RejectedAutoRecalculation;
-use Payroll\Application\Logging\RejectedRecalculationLog;
+use Payroll\Application\Logging\RejectedRecalculationLogInterface;
 use Payroll\Application\Projection\PayrollLineProjectionHandler;
-use Payroll\Domain\Salary\Repository\SalaryRepository;
+use Payroll\Domain\Salary\Repository\SalaryRepositoryInterface;
 
 final class ApplyAutoCalculatedAmountCommandHandler
 {
     public function __construct(
-        private readonly SalaryRepository $salaryRepository,
+        private readonly SalaryRepositoryInterface $salaryRepository,
         private readonly PayrollLineProjectionHandler $projectionHandler,
-        private readonly RejectedRecalculationLog $rejectedRecalculationLog,
+        private readonly RejectedRecalculationLogInterface $rejectedRecalculationLog,
     ) {
     }
 

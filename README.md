@@ -35,7 +35,7 @@ src/
 ├── Domain/Salary/
 │   ├── Aggregate/Salary.php          Aggregate root — write side, enforces the business rules above
 │   ├── ValueObject/Money.php         Value Object (DECIMAL string + BCMath)
-│   ├── SalaryRepository.php          Repository interface — implemented in Infrastructure
+│   ├── SalaryRepositoryInterface.php          Repository interface — implemented in Infrastructure
 │   └── Event/
 │       ├── AutoPayrollAmountChanged.php   Automatic recalculation applied (baseAmount)
 │       └── ManualAdjustmentAdded.php      Manual correction applied (adjustment, comment)
@@ -44,10 +44,10 @@ src/
 │   ├── Command/, Handler/            One command + handler per write operation
 │   ├── Query/, ReadModel/            GetPayrollLineQuery → PayrollLineReadModel (+ repository interface)
 │   ├── Projection/                   Updates the read model from domain events
-│   └── Logging/                      RejectedRecalculationLog interface + RejectedAutoRecalculation entry
+│   └── Logging/                      RejectedRecalculationLogInterface interface + RejectedAutoRecalculation entry
 │
 ├── Infrastructure/
-│   ├── EventStore/                   InMemoryPayrollLineEventStore + PayrollLineEvent (storage record)
+│   ├── EventStore/                   PayrollLineEventStoreInterface interface + InMemoryPayrollLineEventStore + PayrollLineEvent (storage record)
 │   ├── Repository/                   InMemorySalaryRepository, InMemoryPayrollLineReadModelRepository
 │   └── Logging/                      InMemoryRejectedRecalculationLog
 │
@@ -55,7 +55,7 @@ src/
 
 `Application` and `Domain` never import from `Infrastructure` — they depend on the three interfaces above, each with exactly one `InMemory...` implementation.
 
-`Salary` is the consistency boundary: automatic recalculation no longer affects the line once a manual adjustment exists (the assignment's central rule), and — a defensive addition found while tracing the write/read call chain, not something the assignment states directly — a manual adjustment cannot be added before any automatic amount exists. It's reconstructed by replaying its event stream (`SalaryRepository::load()`).
+`Salary` is the consistency boundary: automatic recalculation no longer affects the line once a manual adjustment exists (the assignment's central rule), and — a defensive addition found while tracing the write/read call chain, not something the assignment states directly — a manual adjustment cannot be added before any automatic amount exists. It's reconstructed by replaying its event stream (`SalaryRepositoryInterface::load()`).
 
 `PayrollLineReadModel` is a separate, independently updated read side — holding the latest automatic amount, the full manual-adjustment history, and the current value, maintained incrementally by `PayrollLineProjectionHandler` as domain events arrive rather than recomputed on each query. It never shares state or code paths with `Salary`.
 
@@ -70,11 +70,12 @@ The aggregate is named `Salary`, not `PayrollLine`/`EarningLine` (the assignment
 - **Domain events carry no `id`.** This PoC has no message bus, no at-least-once delivery, no idempotent-consumer scenario — the one real justification for minting an event id upfront. `(employeeId, version)` is sufficient within this PoC because each employee has a single ordered event stream.
 - **There is no real database.** `InMemoryPayrollLineEventStore` holds events in a plain in-memory array for the lifetime of the process — it stands in for a future Event Store (e.g. a `payroll_events` table) without the domain model depending on which one is behind it. Nothing here is persisted between runs.
 - **`PayrollLineEvent` simulates one row of a future `payroll_events` database table** — a uniform record shared by both event types, kept separate from the domain events themselves. Unlike the domain events, it carries an `id`: a database row conventionally gets a primary key regardless of whether the domain consumes it, which is a different concern from the "no id on domain events" point above.
-- **Rejected automatic recalculations are not persisted as domain events.** Only state-changing events enter the Event Store — the audit requirement covers applied corrections, not rejected system attempts. Each rejection is still recorded separately in a technical log (`RejectedRecalculationLog`), kept out of the aggregate's audit trail on purpose.
+- **Rejected automatic recalculations are not persisted as domain events.** Only state-changing events enter the Event Store — the audit requirement covers applied corrections, not rejected system attempts. Each rejection is still recorded separately in a technical log (`RejectedRecalculationLogInterface`), kept out of the aggregate's audit trail on purpose.
 - **A manual adjustment requires a prior automatic amount.** Enforced in the aggregate (`hasBaseAmount`), not just assumed.
 - **Rehydration validates event version sequence** and rejects gaps. This is a minimal integrity check for the event stream, not a business requirement — the assignment doesn't ask for it; it's cheap insurance against a corrupted or out-of-order stream.
 - **One read-side store and one projection handler, not one per event type.** `PayrollLineProjectionHandler` dispatches internally by event type (mirroring how `Salary` itself dispatches), rather than being split into two classes — avoids unnecessary duplication for what is still a small read model.
-- **`Application` and `Domain` depend only on interfaces they own, never on `Infrastructure` directly** (`Domain\Salary\SalaryRepository`, `Application\ReadModel\PayrollLineReadModelRepository`, `Application\Logging\RejectedRecalculationLog`). Each currently has exactly one `InMemory...` implementation. The abstraction exists to keep dependency direction aligned with the architecture, not to introduce unnecessary implementations.
+- **`Application` and `Domain` depend only on interfaces they own, never on `Infrastructure` directly** (`Domain\Salary\SalaryRepositoryInterface`, `Application\ReadModel\PayrollLineReadModelRepositoryInterface`, `Application\Logging\RejectedRecalculationLogInterface`). Each currently has exactly one `InMemory...` implementation. The abstraction exists to keep dependency direction aligned with the architecture, not to introduce unnecessary implementations.
+- **`PayrollLineEventStoreInterface` is also an interface, for a different reason than the three above.** Its only consumer, `InMemorySalaryRepository`, is itself in `Infrastructure` — so no Dependency Rule boundary is crossed either way. The interface exists purely so the storage backend (`InMemoryPayrollLineEventStore` today, a future `Database...` implementation later) can be swapped without touching `InMemorySalaryRepository`.
 - **No transactional guarantee between appending events and clearing the aggregate's uncommitted events.** Acceptable for a PoC; a real system would need a Unit of Work, a transactional event store, or the Outbox pattern.
 
 ## Testing
