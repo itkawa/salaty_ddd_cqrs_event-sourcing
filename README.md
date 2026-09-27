@@ -80,8 +80,8 @@ The aggregate is named `Salary`, not `PayrollLine`/`EarningLine` (the assignment
 
 ## Testing
 
-51 tests, 115 assertions across `Salary`'s business rules, `Money` (including negative-zero normalization), the event store's storage-record translation, both repositories, the projection handler, and the query/command handlers.
+60 tests, 129 assertions across `Salary`'s business rules (including the zero/negative-amount invariants), `Money` (including negative-zero normalization and sign checks), the event store's storage-record translation and optimistic concurrency check, both repositories, the projection handler, and the query/command handlers.
 
 One test in particular, `PayrollLineWorkedExampleFlowTest`, replays the assignment's full worked example through the actual pipeline (commands → handlers → projection → read model → query) rather than against `Salary` directly — this is what proves "current value and full audit history" are visible through the mechanism a real caller would use, not just internally consistent inside the aggregate.
 
-`ConcurrentSaveKnownLimitationTest` is a characterization test, not a correctness guarantee: it pins down the current (broken) behavior of the concurrent-save scenario — two `Salary` instances loaded for the same employee, both saved — rather than asserting a fix that doesn't exist yet. This is a known, currently-open gap; the test's assertions are expected to change if it's ever addressed.
+`ConcurrentSaveTest` covers the optimistic-concurrency guarantee: a second concurrent save for the same employee is rejected with `ConcurrencyException` without corrupting the stream, different employees never conflict with each other, and sequential saves for the same employee still work.

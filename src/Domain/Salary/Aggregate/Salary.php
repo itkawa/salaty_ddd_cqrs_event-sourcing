@@ -58,7 +58,9 @@ final class Salary
             throw new \InvalidArgumentException('A manual adjustment cannot bring the salary below zero.');
         }
 
-        if (trim($comment) === '') {
+        $comment = trim($comment);
+
+        if ($comment === '') {
             throw new \InvalidArgumentException('A comment is required for a manual adjustment.');
         }
 
