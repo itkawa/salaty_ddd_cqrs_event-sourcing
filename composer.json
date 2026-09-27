@@ -3,7 +3,7 @@
     "description": "PoC: history of manual adjustments to an earning line (DDD + CQRS + Event Sourcing).",
     "type": "project",
     "require": {
-        "php": ">=8.1",
+        "php": ">=8.2",
         "ext-bcmath": "*"
     },
     "autoload": {

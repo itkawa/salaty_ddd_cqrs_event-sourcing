@@ -13,7 +13,7 @@ A proof of concept implementing the "History of Manual Adjustments to an Earning
 
 ## Requirements
 
-- PHP >= 8.1 with `ext-bcmath`
+- PHP >= 8.2 with `ext-bcmath`
 - Composer
 
 ## Running it
