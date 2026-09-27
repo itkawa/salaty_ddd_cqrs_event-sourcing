@@ -7,7 +7,7 @@ namespace Payroll\Infrastructure\Repository;
 use Payroll\Domain\Salary\Aggregate\Salary;
 use Payroll\Domain\Salary\Event\AutoPayrollAmountChanged;
 use Payroll\Domain\Salary\Event\ManualAdjustmentAdded;
-use Payroll\Domain\Salary\SalaryRepository;
+use Payroll\Domain\Salary\Repository\SalaryRepository;
 use Payroll\Infrastructure\EventStore\InMemoryPayrollLineEventStore;
 
 final class InMemorySalaryRepository implements SalaryRepository

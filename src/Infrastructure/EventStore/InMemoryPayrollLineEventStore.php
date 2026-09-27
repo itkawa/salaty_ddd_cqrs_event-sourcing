@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Payroll\Infrastructure\EventStore;
 
+use Payroll\Domain\Salary\Repository\ConcurrencyException;
 use Payroll\Domain\Salary\Event\AutoPayrollAmountChanged;
 use Payroll\Domain\Salary\Event\ManualAdjustmentAdded;
 
@@ -20,12 +21,48 @@ final class InMemoryPayrollLineEventStore
 
     private int $nextId = 1;
 
-    /** @param array<AutoPayrollAmountChanged|ManualAdjustmentAdded> $events */
+    /**
+     * @param array<AutoPayrollAmountChanged|ManualAdjustmentAdded> $events
+     *
+     * @throws ConcurrencyException if any event's version doesn't match what's
+     *         expected for its employeeId — validated for the whole batch before
+     *         anything is appended, so a rejection never partially corrupts a stream.
+     */
     public function append(array $events): void
     {
+        $expectedVersions = [];
+
+        foreach ($events as $event) {
+            $expected = ($expectedVersions[$event->employeeId] ?? $this->latestVersionFor($event->employeeId)) + 1;
+
+            if ($event->version !== $expected) {
+                throw new ConcurrencyException(sprintf(
+                    'Cannot append event for employee "%s": expected version %d, got %d.',
+                    $event->employeeId,
+                    $expected,
+                    $event->version,
+                ));
+            }
+
+            $expectedVersions[$event->employeeId] = $event->version;
+        }
+
         foreach ($events as $event) {
             $this->payrollLineEvents[] = $this->toStorageRecord($event);
         }
+    }
+
+    private function latestVersionFor(string $employeeId): int
+    {
+        $version = 0;
+
+        foreach ($this->payrollLineEvents as $record) {
+            if ($record->employeeId === $employeeId && $record->version > $version) {
+                $version = $record->version;
+            }
+        }
+
+        return $version;
     }
 
     /** @return array<AutoPayrollAmountChanged|ManualAdjustmentAdded> */

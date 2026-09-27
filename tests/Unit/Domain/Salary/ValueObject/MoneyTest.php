@@ -30,6 +30,11 @@ final class MoneyTest extends TestCase
         self::assertSame('5.10', (new Money('5.1'))->value());
     }
 
+    public function testNormalizesNegativeZeroToPlainZero(): void
+    {
+        self::assertSame('0.00', (new Money('-0.00'))->value());
+    }
+
     #[DataProvider('invalidAmounts')]
     public function testRejectsAnInvalidDecimalString(string $invalid): void
     {
@@ -75,5 +80,12 @@ final class MoneyTest extends TestCase
         self::assertSame('1000.00', $base->value());
         self::assertSame('50.00', $delta->value());
         self::assertSame('1050.00', $result->value());
+    }
+
+    public function testAddingOppositeAmountsResultsInPlainZeroNotNegativeZero(): void
+    {
+        $result = (new Money('45.55'))->add(new Money('-45.55'));
+
+        self::assertSame('0.00', $result->value());
     }
 }

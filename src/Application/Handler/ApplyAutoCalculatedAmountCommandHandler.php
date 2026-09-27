@@ -8,7 +8,7 @@ use Payroll\Application\Command\ApplyAutoCalculatedAmountCommand;
 use Payroll\Application\Logging\RejectedAutoRecalculation;
 use Payroll\Application\Logging\RejectedRecalculationLog;
 use Payroll\Application\Projection\PayrollLineProjectionHandler;
-use Payroll\Domain\Salary\SalaryRepository;
+use Payroll\Domain\Salary\Repository\SalaryRepository;
 
 final class ApplyAutoCalculatedAmountCommandHandler
 {
