@@ -63,10 +63,11 @@ final class Salary
         ));
     }
 
-    public function applyAutoCalculatedAmount(Money $baseAmount): void
+    /** Returns false if the amount was rejected because a manual adjustment already exists. */
+    public function applyAutoCalculatedAmount(Money $baseAmount): bool
     {
         if ($this->hasManualAdjustment) {
-            return;
+            return false;
         }
 
         $this->recordThat(new AutoPayrollAmountChanged(
@@ -75,6 +76,8 @@ final class Salary
             createdAt: new \DateTimeImmutable(),
             version: $this->version + 1,
         ));
+
+        return true;
     }
 
     public function getCurrentAmount(): Money

@@ -6,7 +6,7 @@ namespace Payroll\Application\Handler;
 
 use Payroll\Application\Command\AddManualAdjustmentCommand;
 use Payroll\Application\Projection\PayrollLineProjectionHandler;
-use Payroll\Infrastructure\Repository\SalaryRepository;
+use Payroll\Domain\Salary\SalaryRepository;
 
 final class AddManualAdjustmentCommandHandler
 {

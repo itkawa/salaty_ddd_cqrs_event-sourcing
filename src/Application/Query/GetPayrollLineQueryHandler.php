@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Payroll\Application\Query;
 
 use Payroll\Application\ReadModel\PayrollLineReadModel;
-use Payroll\Infrastructure\Repository\PayrollLineReadModelRepository;
+use Payroll\Application\ReadModel\PayrollLineReadModelRepository;
 
 final class GetPayrollLineQueryHandler
 {

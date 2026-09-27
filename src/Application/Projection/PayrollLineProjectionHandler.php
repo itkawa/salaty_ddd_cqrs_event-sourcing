@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Payroll\Application\Projection;
 
 use Payroll\Application\ReadModel\PayrollLineReadModel;
+use Payroll\Application\ReadModel\PayrollLineReadModelRepository;
 use Payroll\Domain\Salary\Event\AutoPayrollAmountChanged;
 use Payroll\Domain\Salary\Event\ManualAdjustmentAdded;
-use Payroll\Infrastructure\Repository\PayrollLineReadModelRepository;
 
 final class PayrollLineProjectionHandler
 {

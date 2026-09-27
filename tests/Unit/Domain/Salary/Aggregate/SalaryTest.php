@@ -26,8 +26,9 @@ final class SalaryTest extends TestCase
     {
         $salary = Salary::forEmployee(self::EMPLOYEE_ID);
 
-        $salary->applyAutoCalculatedAmount(new Money('1000.00'));
+        $applied = $salary->applyAutoCalculatedAmount(new Money('1000.00'));
 
+        self::assertTrue($applied);
         self::assertSame('1000.00', $salary->getCurrentAmount()->value());
 
         $events = $salary->getUncommittedEvents();
@@ -94,8 +95,9 @@ final class SalaryTest extends TestCase
 
         $eventCountBefore = count($salary->getUncommittedEvents());
 
-        $salary->applyAutoCalculatedAmount(new Money('9999.99'));
+        $applied = $salary->applyAutoCalculatedAmount(new Money('9999.99'));
 
+        self::assertFalse($applied);
         self::assertSame('1004.45', $salary->getCurrentAmount()->value());
         self::assertCount($eventCountBefore, $salary->getUncommittedEvents());
     }

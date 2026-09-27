@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Payroll\Infrastructure\Repository;
 
 use Payroll\Application\ReadModel\PayrollLineReadModel;
+use Payroll\Application\ReadModel\PayrollLineReadModelRepository;
 
-final class PayrollLineReadModelRepository
+final class InMemoryPayrollLineReadModelRepository implements PayrollLineReadModelRepository
 {
     /** @var array<string, PayrollLineReadModel> */
     private array $lines = [];

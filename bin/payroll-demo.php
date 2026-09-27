@@ -15,8 +15,9 @@ use Payroll\Application\Query\GetPayrollLineQueryHandler;
 use Payroll\Application\ReadModel\PayrollLineReadModel;
 use Payroll\Domain\Salary\ValueObject\Money;
 use Payroll\Infrastructure\EventStore\InMemoryPayrollLineEventStore;
-use Payroll\Infrastructure\Repository\PayrollLineReadModelRepository;
-use Payroll\Infrastructure\Repository\SalaryRepository;
+use Payroll\Infrastructure\Logging\InMemoryRejectedRecalculationLog;
+use Payroll\Infrastructure\Repository\InMemoryPayrollLineReadModelRepository;
+use Payroll\Infrastructure\Repository\InMemorySalaryRepository;
 
 function money(string $value): string
 {
@@ -33,10 +34,11 @@ function printCurrentValue(GetPayrollLineQueryHandler $queryHandler, string $emp
 
 // Wiring — no container needed for a PoC, plain composition.
 $eventStore = new InMemoryPayrollLineEventStore();
-$salaryRepository = new SalaryRepository($eventStore);
-$readModelRepository = new PayrollLineReadModelRepository();
+$salaryRepository = new InMemorySalaryRepository($eventStore);
+$readModelRepository = new InMemoryPayrollLineReadModelRepository();
 $projectionHandler = new PayrollLineProjectionHandler($readModelRepository);
-$autoHandler = new ApplyAutoCalculatedAmountCommandHandler($salaryRepository, $projectionHandler);
+$rejectedRecalculationLog = new InMemoryRejectedRecalculationLog();
+$autoHandler = new ApplyAutoCalculatedAmountCommandHandler($salaryRepository, $projectionHandler, $rejectedRecalculationLog);
 $manualHandler = new AddManualAdjustmentCommandHandler($salaryRepository, $projectionHandler);
 $queryHandler = new GetPayrollLineQueryHandler($readModelRepository);
 
@@ -59,6 +61,10 @@ printCurrentValue($queryHandler, $employeeId);
 echo "Step 4: Source data changes again, system attempts to recalculate (must be ignored — line already has a manual correction)\n";
 $autoHandler->handle(new ApplyAutoCalculatedAmountCommand($employeeId, new Money('9999.99')));
 printCurrentValue($queryHandler, $employeeId);
+
+$rejectedAttempts = $rejectedRecalculationLog->allFor($employeeId);
+echo '  -> Technical log: ' . count($rejectedAttempts) . ' rejected recalculation attempt(s) recorded'
+    . " (not part of the Event Store / audit trail)\n\n";
 
 echo "Step 5: Specialist adds a second correction (+\$100.10): \"Late correction: missed approved overtime bonus\"\n";
 $manualHandler->handle(new AddManualAdjustmentCommand($employeeId, new Money('100.10'), 'Late correction: missed approved overtime bonus'));
