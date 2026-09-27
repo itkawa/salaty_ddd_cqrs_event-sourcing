@@ -88,4 +88,15 @@ final class MoneyTest extends TestCase
 
         self::assertSame('0.00', $result->value());
     }
+
+    public function testIsNegativeIsTrueForANegativeAmount(): void
+    {
+        self::assertTrue((new Money('-45.55'))->isNegative());
+    }
+
+    public function testIsNegativeIsFalseForZeroAndPositiveAmounts(): void
+    {
+        self::assertFalse((new Money('0.00'))->isNegative());
+        self::assertFalse((new Money('45.55'))->isNegative());
+    }
 }

@@ -27,6 +27,11 @@ final class Money
         return $this->amount;
     }
 
+    public function isNegative(): bool
+    {
+        return str_starts_with($this->amount, '-');
+    }
+
     private function assertValidDecimal(string $amount): void
     {
         if (!preg_match('/^-?\d+(\.\d{1,' . self::SCALE . '})?$/', $amount)) {

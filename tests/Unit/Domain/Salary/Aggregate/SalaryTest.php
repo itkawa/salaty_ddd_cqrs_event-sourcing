@@ -86,9 +86,40 @@ final class SalaryTest extends TestCase
         $salary = Salary::forEmployee(self::EMPLOYEE_ID);
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('An automatically calculated amount cannot be zero.');
+        $this->expectExceptionMessage('An automatically calculated amount must be greater than zero.');
 
         $salary->applyAutoCalculatedAmount(new Money('0.00'));
+    }
+
+    public function testApplyingANegativeAutomaticAmountIsRejected(): void
+    {
+        $salary = Salary::forEmployee(self::EMPLOYEE_ID);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('An automatically calculated amount must be greater than zero.');
+
+        $salary->applyAutoCalculatedAmount(new Money('-100.00'));
+    }
+
+    public function testManualAdjustmentThatWouldBringTheSalaryBelowZeroIsRejected(): void
+    {
+        $salary = Salary::forEmployee(self::EMPLOYEE_ID);
+        $salary->applyAutoCalculatedAmount(new Money('100.00'));
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('A manual adjustment cannot bring the salary below zero.');
+
+        $salary->addManualAdjustment(new Money('-150.00'), 'overshoots the current amount');
+    }
+
+    public function testManualAdjustmentThatBringsTheSalaryToExactlyZeroIsAllowed(): void
+    {
+        $salary = Salary::forEmployee(self::EMPLOYEE_ID);
+        $salary->applyAutoCalculatedAmount(new Money('100.00'));
+
+        $salary->addManualAdjustment(new Money('-100.00'), 'zeroes out the current amount');
+
+        self::assertSame('0.00', $salary->getCurrentAmount()->value());
     }
 
     public function testManualAdjustmentAppliesItsDeltaAndRecordsAnEvent(): void
