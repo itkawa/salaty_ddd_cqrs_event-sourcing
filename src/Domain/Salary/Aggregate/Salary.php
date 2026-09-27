@@ -50,6 +50,10 @@ final class Salary
             throw new \LogicException('Cannot add a manual adjustment before an automatic amount has been applied.');
         }
 
+        if ($adjustment->value() === '0.00') {
+            throw new \InvalidArgumentException('A manual adjustment cannot be zero.');
+        }
+
         if (trim($comment) === '') {
             throw new \InvalidArgumentException('A comment is required for a manual adjustment.');
         }
@@ -66,6 +70,10 @@ final class Salary
     /** Returns false if the amount was rejected because a manual adjustment already exists. */
     public function applyAutoCalculatedAmount(Money $baseAmount): bool
     {
+        if ($baseAmount->value() === '0.00') {
+            throw new \InvalidArgumentException('An automatically calculated amount cannot be zero.');
+        }
+
         if ($this->hasManualAdjustment) {
             return false;
         }

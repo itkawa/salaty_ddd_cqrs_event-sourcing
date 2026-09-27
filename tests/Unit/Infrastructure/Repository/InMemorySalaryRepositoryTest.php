@@ -26,9 +26,10 @@ final class InMemorySalaryRepositoryTest extends TestCase
         $salary = $repository->load('emp-001');
         $salary->applyAutoCalculatedAmount(new Money('1000.00'));
 
-        $events = $repository->save($salary);
+        self::assertCount(1, $salary->getUncommittedEvents());
 
-        self::assertCount(1, $events);
+        $repository->save($salary);
+
         self::assertSame([], $salary->getUncommittedEvents());
     }
 

@@ -22,7 +22,11 @@ final class AddManualAdjustmentCommandHandler
 
         $salary->addManualAdjustment($command->adjustment, $command->comment);
 
-        foreach ($this->salaryRepository->save($salary) as $event) {
+        $events = $salary->getUncommittedEvents();
+
+        $this->salaryRepository->save($salary);
+
+        foreach ($events as $event) {
             $this->projectionHandler->handle($event);
         }
     }

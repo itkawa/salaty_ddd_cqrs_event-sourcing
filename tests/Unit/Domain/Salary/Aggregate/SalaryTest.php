@@ -70,6 +70,27 @@ final class SalaryTest extends TestCase
         $salary->addManualAdjustment(new Money('-10.00'), '   ');
     }
 
+    public function testManualAdjustmentRejectsAZeroAmount(): void
+    {
+        $salary = Salary::forEmployee(self::EMPLOYEE_ID);
+        $salary->applyAutoCalculatedAmount(new Money('1000.00'));
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('A manual adjustment cannot be zero.');
+
+        $salary->addManualAdjustment(new Money('0.00'), 'no-op correction');
+    }
+
+    public function testApplyingAZeroAutomaticAmountIsRejected(): void
+    {
+        $salary = Salary::forEmployee(self::EMPLOYEE_ID);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('An automatically calculated amount cannot be zero.');
+
+        $salary->applyAutoCalculatedAmount(new Money('0.00'));
+    }
+
     public function testManualAdjustmentAppliesItsDeltaAndRecordsAnEvent(): void
     {
         $salary = Salary::forEmployee(self::EMPLOYEE_ID);
